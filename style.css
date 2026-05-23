@@ -1,0 +1,137 @@
+/* ... a korábbi CSS kód változatlan ... */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background: #f4f6f9;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.auth-container {
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    width: 100%;
+    max-width: 400px;
+    border-top: 5px solid #fdb913; /* Sárga csík a tetején */
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+/* ÚJ LOGÓ STÍLUS */
+.auth-logo {
+    max-width: 150px; /* Adjust as needed */
+    height: auto;
+    margin-bottom: 15px; /* Space between logo and title */
+}
+
+.auth-header h2 {
+    color: #002f6c; /* Sötétkék */
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.auth-header p {
+    color: #777;
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+/* Váltógombok stílusa */
+.main-toggle, .role-toggle {
+    display: flex;
+    background: #eee;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    padding: 4px;
+}
+
+.main-toggle button, .role-toggle button {
+    flex: 1;
+    background: transparent;
+    border: none;
+    padding: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: 0.3s;
+    font-size: 14px;
+}
+
+.main-toggle button.active {
+    background: #002f6c;
+    color: white;
+}
+
+.role-toggle button.active {
+    background: #ce1126; /* Piros a szerepkörnek */
+    color: white;
+}
+
+/* Űrlap elemek */
+.auth-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.input-group {
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+}
+
+.input-group label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 5px;
+}
+
+.input-group input {
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    outline: none;
+    font-size: 15px;
+    transition: 0.2s;
+}
+
+.input-group input:focus {
+    border-color: #002f6c;
+    box-shadow: 0 0 5px rgba(0, 47, 108, 0.2);
+}
+
+/* Gombok */
+.btn-submit {
+    padding: 14px;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+    margin-top: 10px;
+}
+
+.btn-blue { background: #002f6c; }
+.btn-blue:hover { background: #001f4d; }
+
+.btn-red { background: #ce1126; }
+.btn-red:hover { background: #9e0d1c; }
+
+.hidden {
+    display: none !important;
+}

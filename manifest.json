@@ -1,0 +1,22 @@
+{
+    "name": "RoCatalog Platformă Școlară",
+    "short_name": "RoCatalog",
+    "description": "Catalog Electronic și Monitorizare Elevi",
+    "start_url": "index.html",
+    "display": "standalone",
+    "background_color": "#f4f6f8",
+    "theme-color": "#990000",
+    "orientation": "portrait",
+    "icons": [
+      {
+        "src": "icon.png",
+        "sizes": "192x192",
+        "type": "image/png"
+      },
+      {
+        "src": "favicon.png",
+        "sizes": "512x512",
+        "type": "image/png"
+      }
+    ]
+  }

@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RoCatalog - Panou Principal</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
+        
+        /* ALAP ELRENDEZÉS: Nagy képernyőn egymás mellett vannak */
+        body { background: #f4f6f8; color: #333; display: flex; min-height: 100vh; flex-direction: row; }
+        
+        /* SIDEBAR */
+        .sidebar { width: 280px; background: #1e293b; color: white; padding: 20px; display: flex; flex-direction: column; flex-shrink: 0; }
+        .sidebar h1 { font-size: 22px; margin-bottom: 20px; text-align: center; color: #38bdf8; border-bottom: 1px solid #334155; padding-bottom: 15px; }
+        .user-box { background: #334155; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; }
+        .user-avatar { width: 50px; height: 50px; background: #38bdf8; color: #1e293b; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 20px; font-weight: bold; margin: 0 auto 10px; }
+        .user-name { font-weight: bold; font-size: 16px; margin-bottom: 3px; }
+        .user-role { font-size: 12px; color: #94a3b8; }
+        
+        /* MAIN CONTENT */
+        .main-content { flex: 1; padding: 30px; width: 100%; overflow-x: hidden; }
+        .header { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+        .school-title { font-size: 16px; font-weight: bold; color: #1e293b; word-break: break-word; }
+        .logout-btn { padding: 8px 15px; background: #ef4444; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; flex-shrink: 0; }
+        
+        /* PANELS & CARDS */
+        .panel { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.04); margin-bottom: 25px; }
+        .panel h3 { margin-bottom: 20px; color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; font-size: 18px; }
+        
+        .grid-inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .form-control { display: flex; flex-direction: column; }
+        .form-control label { font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #64748b; }
+        .form-control input, .form-control select { padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; outline: none; width: 100%; }
+        
+        .btn { padding: 10px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; color: white; transition: background 0.2s; text-align: center; }
+        .btn-primary { background: #0284c7; }
+        .btn-success { background: #16a34a; }
+        .btn-warning { background: #ea580c; }
+        
+        /* TELEFONRA OPTIMALIZÁLT TÁBLÁZAT KONTÉNER */
+        #catalog-table-container { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; min-width: 400px; }
+        th, td { padding: 12px 10px; text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 14px; }
+        th { background: #f8fafc; color: #64748b; font-weight: bold; }
+        
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; display: inline-block; }
+        .badge-red { background: #fee2e2; color: #ef4444; }
+        .badge-green { background: #dcfce7; color: #15803d; }
+        .badge-blue { background: #e0f2fe; color: #0369a1; }
+
+        .hidden { display: none; }
+        .diriginte-section { background: #fffbeb; border: 1px solid #fef3c7; padding: 15px; border-radius: 8px; margin-top: 15px; }
+
+        /* MOBIL STÍLUSOK (Ha a kijelző kisebb mint 768px, egymás alá ugranak az elemek) */
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .sidebar { width: 100%; border-radius: 0 0 15px 15px; padding: 15px; }
+            .sidebar h1 { margin-bottom: 10px; padding-bottom: 8px; font-size: 20px; }
+            .user-box { margin-bottom: 10px; padding: 10px; display: flex; align-items: center; text-align: left; gap: 15px; }
+            .user-avatar { margin: 0; width: 40px; height: 40px; font-size: 16px; }
+            #class-info-box { text-align: left; margin-bottom: 5px; font-size: 12px; }
+            
+            .main-content { padding: 15px; }
+            .header { padding: 15px; border-radius: 8px; margin-bottom: 15px; }
+            .panel { padding: 15px; border-radius: 8px; }
+            
+            th, td { padding: 8px 6px; font-size: 13px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <h1>RoCatalog</h1>
+        <div class="user-box">
+            <div class="user-avatar" id="user-avatar-text">-</div>
+            <div>
+                <div class="user-name" id="profile-name">Incarcare...</div>
+                <div class="user-role" id="profile-role">Rol Utilizator</div>
+            </div>
+        </div>
+        <div id="class-info-box" style="color: #94a3b8; text-align: center; margin-bottom: 20px;"></div>
+        
+        <div id="diriginte-switch-box" class="hidden" style="background: #334155; padding: 10px; border-radius: 6px; font-size: 13px;">
+            <label style="display: flex; align-items: center; cursor: pointer; gap: 8px;">
+                <input type="checkbox" id="is-diriginte-checkbox" onchange="toggleDiriginteRole()"> 
+                <span>Sunt Diriginte (Of. vagyok)</span>
+            </label>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="header">
+            <div class="school-title" id="display-school-name">Nume Școală</div>
+            <button class="logout-btn" onclick="logout()">Deconectare</button>
+        </div>
+
+        <div id="teacher-panel" class="panel hidden">
+            <h3>Panou Gestiune Note și Absențe</h3>
+            
+            <div class="grid-inputs">
+                <div class="form-control">
+                    <label>Alege Clasa:</label>
+                    <select id="teacher-class-select" onchange="loadStudentsForTeacher()">
+                        <option value="V. A">V. A</option><option value="V. B">V. B</option><option value="V. C">V. C</option>
+                        <option value="VI. A">VI. A</option><option value="VI. B">VI. B</option><option value="VI. C">VI. C</option>
+                        <option value="VII. A">VII. A</option><option value="VII. B">VII. B</option><option value="VII. C">VII. C</option>
+                        <option value="VIII. A">VIII. A</option><option value="VIII. B">VIII. B</option><option value="VIII. C">VIII. C</option>
+                        <option value="IX. A">IX. A</option><option value="IX. B">IX. B</option><option value="IX. C">IX. C</option>
+                        <option value="X. A">X. A</option><option value="X. B">X. B</option><option value="X. C">X. C</option>
+                        <option value="XI. A">XI. A</option><option value="XI. B">XI. B</option><option value="XI. C">XI. C</option>
+                        <option value="XII. A">XII. A</option><option value="XII. B">XII. B</option><option value="XII. C">XII. C</option>
+                    </select>
+                </div>
+                
+                <div class="form-control">
+                    <label>Selectează Elevul:</label>
+                    <select id="teacher-student-select" onchange="loadStudentDataView()"></select>
+                </div>
+            </div>
+
+            <div class="grid-inputs" style="border-top: 1px solid #e2e8f0; padding-top: 15px;">
+                <div class="form-control">
+                    <label>Notă (Jegy 1-10):</label>
+                    <input type="number" id="new-grade-value" min="1" max="10" placeholder="Ex: 10">
+                </div>
+                <div class="form-control" style="justify-content: flex-end;">
+                    <button class="btn btn-primary" onclick="addGrade()">Adaugă Notă</button>
+                </div>
+                <div class="form-control" style="justify-content: flex-end;">
+                    <button class="btn btn-warning" onclick="addAbsence()">Adaugă Absență</button>
+                </div>
+                <div class="form-control" style="justify-content: flex-end;">
+                    <button class="btn btn-success" onclick="closeMedia()">Încheiere Medie</button>
+                </div>
+            </div>
+
+            <div id="student-preview-data" style="margin-top: 15px; padding: 10px; background: #f8fafc; border-radius: 6px;">
+                <h4 style="font-size: 14px; margin-bottom: 5px;">Situație curentă elev:</h4>
+                <p style="font-size: 13px; margin-bottom: 3px;">Note: <span id="preview-grades" style="font-weight:bold; color:#0284c7;">-</span></p>
+                <p style="font-size: 13px;">Medie încheiată: <span id="preview-media" class="badge badge-blue">-</span></p>
+            </div>
+
+            <div id="diriginte-panel" class="diriginte-section hidden">
+                <h4 style="color: #b45309; margin-bottom: 10px;">📋 Panou Diriginte - Motivare Absențe</h4>
+                <div id="diriginte-absences-list"></div>
+            </div>
+        </div>
+
+        <div id="student-panel" class="panel hidden">
+            <h3>Carnetul de Note Electronic</h3>
+            <div id="catalog-table-container"></div>
+        </div>
+
+    </div>
+
+    <script>
+        let loggedInUser = JSON.parse(localStorage.getItem(sessionStorage.getItem('currentUser')));
+        
+        if (!loggedInUser) {
+            window.location.href = 'index.html';
+        }
+
+        document.getElementById('profile-name').innerText = loggedInUser.name;
+        document.getElementById('user-avatar-text').innerText = loggedInUser.name[0].toUpperCase();
+        document.getElementById('display-school-name').innerText = loggedInUser.schoolName || "Catalog Electronic";
+
+        if (loggedInUser.role === 'profesor') {
+            document.getElementById('profile-role').innerText = "Profesor | " + loggedInUser.extra;
+            document.getElementById('teacher-panel').classList.remove('hidden');
+            document.getElementById('diriginte-switch-box').classList.remove('hidden');
+            
+            if (localStorage.getItem(loggedInUser.email + "_isDiriginte") === "true") {
+                document.getElementById('is-diriginte-checkbox').checked = true;
+                toggleDiriginteRole();
+            }
+
+            loadStudentsForTeacher();
+        } else if (loggedInUser.role === 'elev') {
+            document.getElementById('profile-role').innerText = "Elev | Clasa " + loggedInUser.extra;
+            document.getElementById('class-info-box').innerText = "Cod parinte: " + loggedInUser.parentCode;
+            document.getElementById('student-panel').classList.remove('hidden');
+            displayStudentCatalog(loggedInUser.email);
+        } else if (loggedInUser.role === 'parinte') {
+            document.getElementById('profile-role').innerText = "Părinte | Copil: " + loggedInUser.extra;
+            document.getElementById('student-panel').classList.remove('hidden');
+            displayStudentCatalog(loggedInUser.childEmail);
+        }
+
+        function loadStudentsForTeacher() {
+            const classSelect = document.getElementById('teacher-class-select').value;
+            const studentSelect = document.getElementById('teacher-student-select');
+            studentSelect.innerHTML = "";
+
+            let found = false;
+            for (let i = 0; i < localStorage.length; i++) {
+                let key = localStorage.key(i);
+                if (key.includes('@') && !key.includes('_')) {
+                    let u = JSON.parse(localStorage.getItem(key));
+                    if (u && u.role === 'elev' && u.schoolCode === loggedInUser.schoolCode && u.extra === classSelect) {
+                        studentSelect.innerHTML += `<option value="${u.email}">${u.name}</option>`;
+                        found = true;
+                    }
+                }
+            }
+            if(!found) {
+                studentSelect.innerHTML = "<option value=''>Nu sunt elevi în această clasă</option>";
+            }
+            loadStudentDataView();
+        }
+
+        function loadStudentDataView() {
+            const studentEmail = document.getElementById('teacher-student-select').value;
+            if(!studentEmail) {
+                document.getElementById('preview-grades').innerText = "-";
+                document.getElementById('preview-media').innerText = "-";
+                return;
+            }
+
+            const materie = loggedInUser.extra;
+            let dataKey = studentEmail + "_" + loggedInUser.schoolCode + "_data";
+            let studentData = JSON.parse(localStorage.getItem(dataKey)) || { grades: {}, absences: [], medias: {} };
+
+            let text = `${materie}: ${studentData.grades[materie]?.join(", ") || "Nu are note"}`;
+            let mediaText = `${materie}: ${studentData.medias[materie] || "Neîncheiat"}`;
+
+            const isChecked = document.getElementById('is-diriginte-checkbox').checked;
+            if (isChecked) {
+                let notePurtare = studentData.grades["Purtare / Magaviselet"] || [];
+                let mediePurtare = studentData.medias["Purtare / Magaviselet"] || "Neîncheiat";
+                text += ` | Magaviselet: ${notePurtare.join(", ") || "Nu are note"}`;
+                mediaText += ` | Magaviselet lezárás: ${mediePurtare}`;
+            }
+
+            document.getElementById('preview-grades').innerText = text;
+            document.getElementById('preview-media').innerText = mediaText;
+
+            refreshDiriginteAbsences(studentEmail);
+        }
+
+        function addGrade() {
+            const studentEmail = document.getElementById('teacher-student-select').value;
+            const gradeVal = parseInt(document.getElementById('new-grade-value').value);
+            if(!studentEmail || !gradeVal || gradeVal < 1 || gradeVal > 10) { alert("Introduceți o notă validă între 1 și 10!"); return; }
+
+            let materie = loggedInUser.extra;
+            
+            const isChecked = document.getElementById('is-diriginte-checkbox').checked;
+            if (isChecked) {
+                let opcio = confirm(`Apasă OK pentru [Purtare / Magaviselet] sau CANCEL pentru tárgyad [${materie}]`);
+                if (opcio) {
+                    materie = "Purtare / Magaviselet";
+                }
+            }
+
+            let dataKey = studentEmail + "_" + loggedInUser.schoolCode + "_data";
+            let studentData = JSON.parse(localStorage.getItem(dataKey)) || { grades: {}, absences: [], medias: {} };
+
+            if(!studentData.grades[materie]) studentData.grades[materie] = [];
+            studentData.grades[materie].push(gradeVal);
+
+            localStorage.setItem(dataKey, JSON.stringify(studentData));
+            alert(`Nota ${gradeVal} a fost adăugată la: ${materie}`);
+            document.getElementById('new-grade-value').value = "";
+            loadStudentDataView();
+        }
+
+        function addAbsence() {
+            const studentEmail = document.getElementById('teacher-student-select').value;
+            if(!studentEmail) return;
+
+            const materie = loggedInUser.extra;
+            let dataKey = studentEmail + "_" + loggedInUser.schoolCode + "_data";
+            let studentData = JSON.parse(localStorage.getItem(dataKey)) || { grades: {}, absences: [], medias: {} };
+
+            let today = new Date().toLocaleDateString('ro-RO');
+            studentData.absences.push({
+                id: "ABS-" + Date.now(),
+                materie: materie,
+                data: today,
+                status: "Nemotivată"
+            });
+
+            localStorage.setItem(dataKey, JSON.stringify(studentData));
+            alert("Absența a fost adăugată!");
+            loadStudentDataView();
+        }
+
+        function closeMedia() {
+            const studentEmail = document.getElementById('teacher-student-select').value;
+            if(!studentEmail) return;
+
+            let materie = loggedInUser.extra;
+            
+            const isChecked = document.getElementById('is-diriginte-checkbox').checked;
+            if (isChecked) {
+                let opcio = confirm(`Apasă OK pentru a încheia [Purtare / Magaviselet] sau CANCEL pentru [${materie}]`);
+                if (opcio) {
+                    materie = "Purtare / Magaviselet";
+                }
+            }
+
+            let dataKey = studentEmail + "_" + loggedInUser.schoolCode + "_data";
+            let studentData = JSON.parse(localStorage.getItem(dataKey)) || { grades: {}, absences: [], medias: {} };
+
+            let currentGrades = studentData.grades[materie] || [];
+            if(currentGrades.length < 1 && materie === "Purtare / Magaviselet") {
+                alert("Adăugați cel puțin o notă la purtare înainte de încheiere!");
+                return;
+            }
+            if(currentGrades.length < 2 && materie !== "Purtare / Magaviselet") {
+                alert("Elevul trebuie să aibă cel puțin 2 note la materie!");
+                return;
+            }
+
+            let sum = currentGrades.reduce((a, b) => a + b, 0);
+            let media = Math.round(sum / currentGrades.length);
+
+            studentData.medias[materie] = media;
+            localStorage.setItem(dataKey, JSON.stringify(studentData));
+            
+            alert(`Media la ${materie} a fost încheiată: ${media}`);
+            loadStudentDataView();
+        }
+
+        function toggleDiriginteRole() {
+            const isChecked = document.getElementById('is-diriginte-checkbox').checked;
+            localStorage.setItem(loggedInUser.email + "_isDiriginte", isChecked);
+            
+            const dirPanel = document.getElementById('diriginte-panel');
+            if(isChecked) {
+                dirPanel.classList.remove('hidden');
+                loadStudentDataView();
+            } else {
+                dirPanel.classList.add('hidden');
+            }
+        }
+
+        function refreshDiriginteAbsences(studentEmail) {
+            const container = document.getElementById('diriginte-absences-list');
+            if(!container) return;
+            container.innerHTML = "";
+
+            let dataKey = studentEmail + "_" + loggedInUser.schoolCode + "_data";
+            let studentData = JSON.parse(localStorage.getItem(dataKey)) || { grades: {}, absences: [], medias: {} };
+
+            if(!studentData.absences || studentData.absences.length === 0) {
+                container.innerHTML = "<p style='font-size:13px; color:gray;'>Nu sunt absențe înregistrate.</p>";
+                return;
+            }
+
+            let html = "<table><tr><th>Materie</th><th>Dată</th><th>Status</th><th>Acțiune</th></tr>";
+            studentData.absences.forEach(abs => {
+                let badgeClass = abs.status === "Motivată" ? "badge-green" : "badge-red";
+                let actionButton = abs.status === "Nemotivată"  
+                    ? `<button class="btn btn-success" style="padding:4px 8px; font-size:11px;" onclick="motivateAbsence('${studentEmail}', '${abs.id}')">Motivează</button>` 
+                    : `<span style='color:gray; font-size:12px;'>✓ Motivată</span>`;
+
+                html += `<tr>
+                    <td>${abs.materie}</td>
+                    <td>${abs.data}</td>
+                    <td><span class="badge ${badgeClass}">${abs.status}</span></td>
+                    <td>${actionButton}</td>
+                </tr>`;
+            });
+            html += "</table>";
+            container.innerHTML = html;
+        }
+
+        function motivateAbsence(studentEmail, absenceId) {
+            let dataKey = studentEmail + "_" + loggedInUser.schoolCode + "_data";
+            let studentData = JSON.parse(localStorage.getItem(dataKey));
+
+            studentData.absences = studentData.absences.map(abs => {
+                if(abs.id === absenceId) {
+                    abs.status = "Motivată";
+                }
+                return abs;
+            });
+
+            localStorage.setItem(dataKey, JSON.stringify(studentData));
+            loadStudentDataView();
+        }
+
+        function displayStudentCatalog(studentEmail) {
+            const container = document.getElementById('catalog-table-container');
+            
+            const toateMateriile = [
+                "Informatica și TIC / PC", "Limba și literatura română", "Matematică", 
+                "Limba engleză", "Limba maghiară maternă", "Fizică", "Chimie", "Biologie", 
+                "Istorie", "Geografie", "Educație Fizică", "Educație Muzicală", 
+                "Educație Plastică (Desen)", "Religie", "Consiliere și Orientare",
+                "Purtare / Magaviselet"
+            ];
+
+            let dataKey = studentEmail + "_" + loggedInUser.schoolCode + "_data";
+            let studentData = JSON.parse(localStorage.getItem(dataKey)) || { grades: {}, absences: [], medias: {} };
+
+            let html = "<table><tr><th>Materie (Tantárgy)</th><th>Note (Jegyei)</th><th>Medie (Átlag)</th></tr>";
+            
+            toateMateriile.forEach(mat => {
+                let note = studentData.grades[mat] || [];
+                let medie = studentData.medias[mat] || "Neîncheiat";
+                
+                let rowStyle = mat === "Purtare / Magaviselet" ? "style='background: #fffbeb;'" : "";
+
+                html += `<tr ${rowStyle}>
+                    <td style="font-weight:bold;">${mat}</td>
+                    <td style="color:#0284c7; font-weight:bold;">${note.length ? note.join(", ") : "-"}</td>
+                    <td><span class="badge ${medie !== 'Neîncheiat' ? 'badge-blue' : 'badge-red'}">${medie}</span></td>
+                </tr>`;
+            });
+            html += "</table>";
+
+            let absențeMotivate = studentData.absences.filter(a => a.status === "Motivată").length;
+            let absențeNemotivated = studentData.absences.filter(a => a.status === "Nemotivată").length;
+
+            html += `<div style="margin-top:20px; padding:15px; background:#f8fafc; border-radius:8px;">
+                <h4>Total Absențe:</h4>
+                <p style="margin: 5px 0;">Motivate (Igazolt): <span class="badge badge-green">${absențeMotivate}</span></p>
+                <p>Nemotivate (Igazolatlan): <span class="badge badge-red">${absențeNemotivated}</span></p>
+            </div>`;
+
+            container.innerHTML = html;
+        }
+
+        function logout() {
+            sessionStorage.removeItem('currentUser');
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>

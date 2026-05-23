@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RoCatalog - Autentificare</title>
+    <link rel="icon" type="image/png" href="icon.png">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
+        body { background: #f4f6f8; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        
+        .auth-container { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); width: 100%; max-width: 450px; border: 1px solid #e0e0e0; }
+        
+        .logo-title { text-align: center; margin-bottom: 20px; }
+        .logo-title img { width: 55px; height: 55px; margin-bottom: 8px; }
+        .logo-title h2 { color: #990000; font-size: 26px; font-weight: bold; }
+        .logo-title p { color: #666; font-size: 13px; margin-top: 2px; }
+
+        .role-selector-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 25px; }
+        .role-card { background: #f8f9fa; border: 2px solid #e0e0e0; border-radius: 10px; padding: 12px 5px; text-align: center; cursor: pointer; transition: all 0.2s ease; }
+        .role-card:hover { border-color: #990000; background: #fffcfc; }
+        .role-card.active { border-color: #990000; background: #990000; color: white; }
+        .role-icon { font-size: 22px; display: block; margin-bottom: 4px; }
+        .role-text { font-size: 12px; font-weight: bold; display: block; }
+
+        .tabs { display: flex; margin-bottom: 20px; background: #f1f3f5; border-radius: 8px; padding: 4px; }
+        .tab-btn { flex: 1; padding: 8px; background: none; border: none; font-size: 14px; font-weight: bold; color: #555; cursor: pointer; border-radius: 6px; }
+        .tab-btn.active { background: white; color: #990000; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #444; text-transform: uppercase; letter-spacing: 0.5px; }
+        .form-group input, .form-group select { width: 100%; padding: 11px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; outline: none; }
+        .form-group input:focus, .form-group select:focus { border-color: #990000; }
+        
+        .auth-btn { width: 100%; padding: 12px; background: #990000; color: white; border: none; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .auth-btn:hover { background: #7a0000; }
+
+        .hidden { display: none; }
+        
+        .theme-elev .auth-btn { background: #002f6c; }
+        .theme-profesor .auth-btn { background: #00796b; }
+        .theme-parinte .auth-btn { background: #2e7d32; }
+
+    </style>
+</head>
+<body class="theme-elev">
+
+    <div class="auth-container">
+        <div class="logo-title">
+            <img src="icon.png" alt="Logo">
+            <h2>RoCatalog</h2>
+            <p id="platform-subtitle">Platformă Școlară - Clasa Elevului</p>
+        </div>
+
+        <div class="role-selector-grid">
+            <div id="card-elev" class="role-card active" onclick="selectRole('elev')">
+                <span class="role-icon">🎒</span>
+                <span class="role-text">Elev</span>
+            </div>
+            <div id="card-profesor" class="role-card" onclick="selectRole('profesor')">
+                <span class="role-icon">👨‍🏫</span>
+                <span class="role-text">Profesor</span>
+            </div>
+            <div id="card-parinte" class="role-card" onclick="selectRole('parinte')">
+                <span class="role-icon">👪</span>
+                <span class="role-text">Părinte</span>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button id="btn-tab-login" class="tab-btn active" onclick="switchActionTab('login')">Conectare</button>
+            <button id="btn-tab-register" class="tab-btn" onclick="switchActionTab('register')">Înregistrare</button>
+        </div>
+
+        <form id="login-form">
+            <div class="form-group">
+                <label>Adresă Email:</label>
+                <input type="email" id="login-email" required placeholder="nume@scoala.ro">
+            </div>
+            <div class="form-group">
+                <label>Parolă (Jelszó):</label>
+                <input type="password" id="login-password" required placeholder="******">
+            </div>
+            <button type="submit" class="auth-btn" id="login-submit-btn">Intră ca Elev</button>
+        </form>
+
+        <form id="register-form" class="hidden">
+            <div class="form-group">
+                <label>Nume complet (Teljes név):</label>
+                <input type="text" id="reg-name" required placeholder="Ex: Popescu Ionut">
+            </div>
+            <div class="form-group">
+                <label>Adresă Email:</label>
+                <input type="email" id="reg-email" required placeholder="nume@scoala.ro">
+            </div>
+            <div class="form-group">
+                <label>Parolă (Jelszó):</label>
+                <input type="password" id="reg-password" required placeholder="Minim 6 caractere">
+            </div>
+
+            <div class="form-group" id="group-clasa-select">
+                <label>Alege Clasa (Osztály):</label>
+                <select id="reg-extra-select">
+                    <option value="V. A">V. A</option>
+                    <option value="V. B">V. B</option>
+                    <option value="V. C">V. C</option>
+                    
+                    <option value="VI. A">VI. A</option>
+                    <option value="VI. B">VI. B</option>
+                    <option value="VI. C">VI. C</option>
+                    
+                    <option value="VII. A">VII. A</option>
+                    <option value="VII. B">VII. B</option>
+                    <option value="VII. C">VII. C</option>
+                    
+                    <option value="VIII. A">VIII. A</option>
+                    <option value="VIII. B">VIII. B</option>
+                    <option value="VIII. C">VIII. C</option>
+                    
+                    <option value="IX. A">IX. A</option>
+                    <option value="IX. B">IX. B</option>
+                    <option value="IX. C">IX. C</option>
+                    
+                    <option value="X. A">X. A</option>
+                    <option value="X. B">X. B</option>
+                    <option value="X. C">X. C</option>
+                    
+                    <option value="XI. A">XI. A</option>
+                    <option value="XI. B">XI. B</option>
+                    <option value="XI. C">XI. C</option>
+                    
+                    <option value="XII. A">XII. A</option>
+                    <option value="XII. B">XII. B</option>
+                    <option value="XII. C">XII. C</option>
+                </select>
+            </div>
+
+            <div class="form-group hidden" id="group-materie-select">
+                <label>Materia predată (Tantárgyad):</label>
+                <select id="reg-materie-select">
+                    <option value="Informatica și TIC / PC">Informatica și TIC / PC</option>
+                    <option value="Limba și literatura română">Limba și literatura română</option>
+                    <option value="Matematică">Matematică</option>
+                    <option value="Limba engleză">Limba engleză</option>
+                    <option value="Fizică">Fizică</option>
+                    <option value="Chimie">Chimie</option>
+                    <option value="Biologie">Biologie</option>
+                    <option value="Istorie">Istorie</option>
+                    <option value="Geografie">Geografie</option>
+                    <option value="Educație Fizică">Educație Fizică</option>
+                </select>
+            </div>
+
+            <div class="form-group hidden" id="group-text-extra">
+                <label id="text-extra-label">Cod Înregistrare Părinte:</label>
+                <input type="text" id="reg-extra-text" placeholder="Ex: ROCAT-XXXX">
+            </div>
+
+            <div class="form-group" id="group-schoolname-input">
+                <label>Numele Școlii (Iskola teljes neve):</label>
+                <input type="text" id="reg-schoolname" required placeholder="Ex: Liceul Tehnologic Székely Károly">
+            </div>
+
+            <button type="submit" class="auth-btn" id="register-submit-btn">Creează cont Elev</button>
+        </form>
+    </div>
+
+    <script>
+        let currentRole = 'elev'; 
+        let currentAction = 'login';
+
+        function selectRole(role) {
+            currentRole = role;
+            document.getElementById('card-elev').classList.toggle('active', role === 'elev');
+            document.getElementById('card-profesor').classList.toggle('active', role === 'profesor');
+            document.getElementById('card-parinte').classList.toggle('active', role === 'parinte');
+            document.body.className = "theme-" + role;
+
+            document.getElementById('group-clasa-select').classList.toggle('hidden', role !== 'elev');
+            document.getElementById('group-materie-select').classList.toggle('hidden', role !== 'profesor');
+            document.getElementById('group-text-extra').classList.toggle('hidden', role !== 'parinte');
+            
+            document.getElementById('group-schoolname-input').classList.toggle('hidden', role === 'parinte');
+            document.getElementById('reg-schoolname').required = (role !== 'parinte');
+
+            if (role === 'elev') {
+                document.getElementById('platform-subtitle').innerText = "Platformă Școlară - Clasa Elevului";
+                document.getElementById('login-submit-btn').innerText = "Intră ca Elev";
+                document.getElementById('register-submit-btn').innerText = "Creează cont Elev";
+            } else if (role === 'profesor') {
+                document.getElementById('platform-subtitle').innerText = "Catalog Electronic - Panou Profesor";
+                document.getElementById('login-submit-btn').innerText = "Intră ca Profesor";
+                document.getElementById('register-submit-btn').innerText = "Creează cont Profesor";
+            } else if (role === 'parinte') {
+                document.getElementById('platform-subtitle').innerText = "Monitorizare Elev - Cont Părinte";
+                document.getElementById('login-submit-btn').innerText = "Intră ca Părinte";
+                document.getElementById('register-submit-btn').innerText = "Creează cont Părinte";
+            }
+        }
+
+        function switchActionTab(action) {
+            currentAction = action;
+            document.getElementById('login-form').classList.toggle('hidden', action !== 'login');
+            document.getElementById('register-form').classList.toggle('hidden', action !== 'register');
+            document.getElementById('btn-tab-login').classList.toggle('active', action === 'login');
+            document.getElementById('btn-tab-register').classList.toggle('active', action === 'register');
+        }
+
+        document.getElementById('register-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('reg-name').value.trim();
+            const email = document.getElementById('reg-email').value.trim();
+            const password = document.getElementById('reg-password').value;
+            
+            let schoolName = document.getElementById('reg-schoolname').value.trim();
+            let schoolCode = schoolName.toUpperCase().replace(/[^A-Z0-9]/g, "");
+            
+            let extraValue = "";
+            let parentCode = "";
+
+            if (currentRole === 'elev') {
+                extraValue = document.getElementById('reg-extra-select').value;
+                parentCode = "ROCAT-" + Math.floor(1000 + Math.random() * 9000);
+            } else if (currentRole === 'profesor') {
+                extraValue = document.getElementById('reg-materie-select').value; 
+            } else if (currentRole === 'parinte') {
+                extraValue = document.getElementById('reg-extra-text').value.trim();
+            }
+
+            if(localStorage.getItem(email)) { alert("Acest e-mail este deja înregistrat!"); return; }
+
+            let newUser = { name, email, password, role: currentRole, extra: extraValue, schoolCode, schoolName, parentCode };
+
+            if (currentRole === 'parinte') {
+                let studentFound = null;
+                for (let i = 0; i < localStorage.length; i++) {
+                    let key = localStorage.key(i);
+                    if (key.includes('@') && !key.includes('_')) {
+                        let u = JSON.parse(localStorage.getItem(key));
+                        if (u && u.role === 'elev' && u.parentCode === extraValue) { studentFound = u; break; }
+                    }
+                }
+                if (!studentFound) { alert("Codul părintelui este invalid! Elevul nu a fost găsit."); return; }
+                newUser.childEmail = studentFound.email;
+                newUser.extra = studentFound.name; 
+                newUser.schoolName = studentFound.schoolName; 
+                newUser.schoolCode = studentFound.schoolCode;
+            }
+
+            localStorage.setItem(email, JSON.stringify(newUser));
+            alert("Cont creat cu succes!");
+            switchActionTab('login');
+        });
+
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+            let user = JSON.parse(localStorage.getItem(email));
+            
+            if(!user || user.password !== password) { alert("Email vagy jelszó hibás!"); return; }
+            if(user.role !== currentRole) { alert(`Contul este de tip [${user.role.toUpperCase()}].`); return; }
+
+            sessionStorage.setItem('currentUser', email);
+            window.location.href = 'dashboard.html';
+        });
+    </script>
+</body>
+</html>
